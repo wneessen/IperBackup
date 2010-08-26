@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-08-26 17:20:30 ]
+# Last modified: [ 2010-08-26 17:35:55 ]
 
 ## This is the IperBackup::Process package {{{
 package IperBackup::Process;
@@ -50,7 +50,7 @@ sub new
 
 	}
 
-	## Config file needs to be set for this object
+	## API object needs to be provided
 	unless( defined( $self->{ 'api' } ) )
 	{
 		$log->error( 'The API object is mandatory for IperBackup::Process::new()' );
