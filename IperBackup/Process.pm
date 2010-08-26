@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-08-26 17:35:55 ]
+# Last modified: [ 2010-08-26 17:54:37 ]
 
 ## This is the IperBackup::Process package {{{
 package IperBackup::Process;
@@ -15,6 +15,7 @@ package IperBackup::Process;
 use warnings;
 use strict;
 use Carp qw( carp croak );
+use Data::Dumper;
 # }}}
 
 ## Defined constants {{{
@@ -112,6 +113,27 @@ sub getToken
 }
 # }}}
 
+### Fetch number of documents in the Ipernity account // getNumberDocs() {{{
+sub getNumberDocs
+{
+
+	## Get object
+	my $self = shift;
+
+	## Read user information via API
+	my $userinfo = $self->{ 'api' }->execute_hash
+	(
+
+		method		=> 'user.get',
+		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
+
+	);
+
+	## Return number of docs to caller
+	return $userinfo->{ 'user' }->{ 'count' }->{ 'docs' } || undef;
+
+}
+# }}}
 
 ## Every module needs a true ending...
 1;

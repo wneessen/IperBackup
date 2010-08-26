@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-08-26 17:18:03 ]
+# Last modified: [ 2010-08-26 17:51:58 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -56,13 +56,14 @@ sub main
 	## Read command line arguments
 	getArgs();
 	
-	## Create a config object
+	## Create a config object {{{
 	my $conf = IperBackup::Config->new
 	({
 
 		conf_file	=> $config->{ 'conffile' },
 
 	});
+	# }}}
 		
 	## Read the config file
 	my $config = $conf->readconf();
@@ -94,16 +95,12 @@ sub main
 
 	}
 	# }}}
-	
-	
-#my $hash = $api->execute_hash
-#(
-#'method'	=> 'doc.getList',
-#'user_id'	=> 15331,
-#'per_page'	=> 10,
-#'page'		=> 10,
-#'auth_token'	=> $config->{ 'IPER_API_AUTHTOKEN' },
-#);
+
+	## Get number of documents
+	my $docsnumber = $iper->getNumberDocs();
+
+	## Show user how many docs going to be fetched
+	print "Found " . $docsnumber . " documents in your user account...\n";
 
 }
 # }}}
