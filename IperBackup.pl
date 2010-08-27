@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-08-26 17:51:58 ]
+# Last modified: [ 2010-08-27 11:34:04 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -20,7 +20,6 @@ use IperBackup::Config;
 use IperBackup::Process;
 use Ipernity::API;
 use Log::Log4perl qw(:easy);
-use Time::HiRes;
 # }}}
 
 ### Basic configuration variables {{{
@@ -100,7 +99,10 @@ sub main
 	my $docsnumber = $iper->getNumberDocs();
 
 	## Show user how many docs going to be fetched
-	print "Found " . $docsnumber . " documents in your user account...\n";
+	$log->info( "Found " . $docsnumber . " documents for user account " . $iper->getUserInfo( 'username' ) . " (" . $iper->getUserInfo( 'realname' ) . ")" );
+
+	## Get list of documents
+	my $documents = $iper->getDocsList();
 
 }
 # }}}
@@ -112,12 +114,16 @@ sub getArgs
 	GetOptions
 	(
 
-		'dir|d=s'	=> \$config->{ 'dir' },
+		'outdir|o=s'	=> \$config->{ 'dir' },
 		'config|c=s'	=> \$config->{ 'conffile' },
 		'help|h'	=> \$config->{ 'help' },
+		'list|l'	=> \$config->{ 'list' },
+		'download|d'	=> \$config->{ 'download' },
 
 	);
 	showHelp() if( $config->{ 'help' } );
+	showHelp() unless( defined( $config->{ 'list' } ) or defined( $config->{ 'download' } ) );
+	showHelp() if( defined( $config->{ 'list' } ) and defined( $config->{ 'download' } ) );
 
 }
 # }}}
@@ -128,7 +134,10 @@ sub showHelp
 
 	## Print message
 	print "Usage: $0 [OPTIONS]\n";
-	print "\n\t-d, --dir\t\tSpecify absolute path to the output directory (Default: /var/tmp).";
+	print "\n\t-o, --outdir\t\tSpecify absolute path to the output directory (Default: /var/tmp)";
+	print "\n\t-c, --config\t\tSpecify absolute path to config file (Default: /etc/IperBackup.conf)";
+	print "\n\t-d, --download\t\tTell IperBackup to download all files in your account";
+	print "\n\t-l, --list\t\tTell IperBackup to create a list of files in you account";
 	print "\n\t-h, --help\t\tDisplay this help message.\n";
 	print "\n";
 

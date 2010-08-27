@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-08-26 17:54:37 ]
+# Last modified: [ 2010-08-27 12:13:58 ]
 
 ## This is the IperBackup::Process package {{{
 package IperBackup::Process;
@@ -16,10 +16,12 @@ use warnings;
 use strict;
 use Carp qw( carp croak );
 use Data::Dumper;
+use Time::HiRes;
 # }}}
 
 ## Defined constants {{{
-use constant EXT_DEBUG				=> 0;								## Enable extended debug logging
+use constant EXT_DEBUG				=> 1;								## Enable extended debug logging
+use constant PER_PAGE				=> 100;								## Number of documents per page to fetch
 use constant VERSION				=> '0.100';							## This modules version
 # }}}
 
@@ -131,6 +133,136 @@ sub getNumberDocs
 
 	## Return number of docs to caller
 	return $userinfo->{ 'user' }->{ 'count' }->{ 'docs' } || undef;
+
+}
+# }}}
+
+### Fetch user information from the Ipernity account // getUserInfo() {{{
+sub getUserInfo
+{
+
+	## Get object
+	my ( $self, $type ) = @_;
+
+	## We need a type of information that has been requested
+	return undef unless defined( $type );
+
+	## Read user information via API
+	my $userinfo = $self->{ 'api' }->execute_hash
+	(
+
+		method		=> 'user.get',
+		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
+
+	);
+
+	## Return requested user information to caller
+	return $userinfo->{ 'user' }->{ $type } || undef;
+
+}
+# }}}
+
+### Fetch document information from Ipernity account // getDocsList() {{{
+sub getDocsList
+{
+
+	## Get object
+	my $self = shift;
+	
+	## Get Logger object
+	my $log = IperBackup::Main::get_logger( 'getDocsList' );
+
+	## Start some benchmarking
+	my $bm_start = [ Time::HiRes::gettimeofday ];
+
+	## Log an info message
+	$log->info( 'Retriving list of documents to be fetched...' );
+
+	## Get number of pages to be fetched
+	my $pages = $self->getNumberPages();
+	$log->debug( 'There a 6 pages of documents (' . PER_PAGE . ' documents each) to be fetched...' );
+
+	## Retrieve all document ids and URLs from every page
+	for my $page ( 1 .. $pages )
+	{
+
+		## Log a debug message
+		$log->debug( "Retrieving docs from page $page..." );
+
+		## Get document list and run through it
+		foreach my $doc ( @{ $self->getDocIDs( $page ) } )
+		{
+
+			## Get document ID for hash table assignment
+			my $docid = $doc->{ 'doc_id' };
+
+			## Store download URL and filename in hash table
+			$self->{ 'docs' }->{ $docid }->{ 'url' } = $doc->{ 'original' }->{ 'url' };
+			$self->{ 'docs' }->{ $docid }->{ 'fn' }  = $doc->{ 'original' }->{ 'filename' };
+
+			## Log some ext. debug message
+			EXT_DEBUG && $log->debug( 'Found document "' . $self->{ 'docs' }->{ $docid }->{ 'fn' } . '" (Document ID: ' . $docid . ')' );
+
+		}
+	}
+	
+	## End the benchmarking
+	$log->debug( 'Document list generated in ' . sprintf( '%.3f', Time::HiRes::tv_interval( $bm_start ) ) . ' seconds' );
+
+
+}
+# }}}
+
+### Retrieve number of pages that have to be fetched // getNumberPages() {{{
+sub getNumberPages
+{
+
+	## Get object
+	my $self = shift;
+
+	## Read documents information via API
+	my $docinfo = $self->{ 'api' }->execute_hash
+	(
+
+		method		=> 'doc.getList',
+		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
+		per_page	=> PER_PAGE,
+
+	);
+
+	## Return number of docs to caller
+	return $docinfo->{ 'docs' }->{ 'pages' } || undef;
+
+}
+# }}}
+
+### Retrieve document IDs // getDocIDs() {{{
+sub getDocIDs
+{
+
+	## Get object
+	my ( $self, $page ) = @_;
+
+	## A page number is mandatory
+	return undef unless defined( $page );
+
+	## Get Logger object
+	my $log = IperBackup::Main::get_logger( 'getDocIDs' );
+
+	## Read documents information via API
+	my $docinfo = $self->{ 'api' }->execute_hash
+	(
+
+		method		=> 'doc.getList',
+		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
+		per_page	=> PER_PAGE,
+		page		=> $page,
+		extra		=> 'original',
+
+	);
+
+	## Return number of docs to caller
+	return $docinfo->{ 'docs' }->{ 'doc' } || undef;
 
 }
 # }}}
