@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-08-27 15:10:56 ]
+# Last modified: [ 2010-08-27 15:35:19 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -25,7 +25,7 @@ use Log::Log4perl qw(:easy);
 
 ### Basic configuration variables {{{
 use constant EXT_DEBUG					=> 0;						## Enable extended debug-logging
-use constant LOGLEVEL					=> 'DEBUG';					## Set the log level
+use constant LOGLEVEL					=> 'INFO';					## Set the log level
 use constant OUTDIR					=> '/var/tmp';					## Default output directory
 use constant VERSION					=> '0.01';					## Current version number
 # }}}
@@ -66,7 +66,7 @@ sub main
 	# }}}
 		
 	## Read the config file
-	my $config = $conf->readconf();
+	my $myconfig = $conf->readconf();
 	
 	## Create an IperBackup::Download object
 	my $dl = IperBackup::Download->new();
@@ -74,9 +74,9 @@ sub main
 	## Create an API object {{{
 	my $api = Ipernity::API->new
 	({
-		api_key		=> $config->{ 'IPER_API_KEY' },
-		secret		=> $config->{ 'IPER_API_SECRET' },
-		outputformat	=> $config->{ 'IPER_API_OUTPUT' },
+		api_key		=> $myconfig->{ 'IPER_API_KEY' },
+		secret		=> $myconfig->{ 'IPER_API_SECRET' },
+		outputformat	=> $myconfig->{ 'IPER_API_OUTPUT' },
 
 	});
 	# }}}
@@ -85,13 +85,13 @@ sub main
 	my $iper = IperBackup::Process->new
 	({
 		api	=> $api,
-		config	=> $config,
+		config	=> $myconfig,
 
 	});
 	# }}}
 
 	## An authtoken is mandatory, fetch one if non-existant {{{
-	unless( defined( $config->{ 'IPER_API_AUTHTOKEN' } ) and defined( $config->{ 'IPER_USERID' } ) )
+	unless( defined( $myconfig->{ 'IPER_API_AUTHTOKEN' } ) and defined( $myconfig->{ 'IPER_USERID' } ) )
 	{
 
 		$iper->getToken( $api );
