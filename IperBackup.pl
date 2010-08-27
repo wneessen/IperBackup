@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-08-27 11:34:04 ]
+# Last modified: [ 2010-08-27 15:10:56 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -17,6 +17,7 @@ use warnings;
 use Data::Dumper; ## Debug only
 use Getopt::Long;
 use IperBackup::Config;
+use IperBackup::Download;
 use IperBackup::Process;
 use Ipernity::API;
 use Log::Log4perl qw(:easy);
@@ -66,7 +67,10 @@ sub main
 		
 	## Read the config file
 	my $config = $conf->readconf();
-
+	
+	## Create an IperBackup::Download object
+	my $dl = IperBackup::Download->new();
+	
 	## Create an API object {{{
 	my $api = Ipernity::API->new
 	({
@@ -103,6 +107,21 @@ sub main
 
 	## Get list of documents
 	my $documents = $iper->getDocsList();
+
+	## Go through each document and download it
+	foreach my $doc ( keys %{ $documents } )
+	{
+
+		## Make URL easily accessable
+		my $url = $documents->{ $doc }->{ 'url' };
+
+		## Generate absolute path to download filename
+		my $file = $iper->isValidFile( $config->{ 'dir' } || OUTDIR, $documents->{ $doc }->{ 'fn' } );
+
+		## Download file from Ipernity
+		$dl->download( $url, $file );
+
+	}
 
 }
 # }}}

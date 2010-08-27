@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-08-27 12:13:58 ]
+# Last modified: [ 2010-08-27 15:07:04 ]
 
 ## This is the IperBackup::Process package {{{
 package IperBackup::Process;
@@ -20,7 +20,7 @@ use Time::HiRes;
 # }}}
 
 ## Defined constants {{{
-use constant EXT_DEBUG				=> 1;								## Enable extended debug logging
+use constant EXT_DEBUG				=> 0;								## Enable extended debug logging
 use constant PER_PAGE				=> 100;								## Number of documents per page to fetch
 use constant VERSION				=> '0.100';							## This modules version
 # }}}
@@ -172,6 +172,9 @@ sub getDocsList
 	## Get Logger object
 	my $log = IperBackup::Main::get_logger( 'getDocsList' );
 
+	## Temporary varible for hash table
+	my ( $docs );
+
 	## Start some benchmarking
 	my $bm_start = [ Time::HiRes::gettimeofday ];
 
@@ -197,11 +200,12 @@ sub getDocsList
 			my $docid = $doc->{ 'doc_id' };
 
 			## Store download URL and filename in hash table
-			$self->{ 'docs' }->{ $docid }->{ 'url' } = $doc->{ 'original' }->{ 'url' };
-			$self->{ 'docs' }->{ $docid }->{ 'fn' }  = $doc->{ 'original' }->{ 'filename' };
+			$docs->{ $docid }->{ 'url' } = $doc->{ 'original' }->{ 'url' };
+			$docs->{ $docid }->{ 'fn' }  = $doc->{ 'original' }->{ 'filename' };
 
 			## Log some ext. debug message
-			EXT_DEBUG && $log->debug( 'Found document "' . $self->{ 'docs' }->{ $docid }->{ 'fn' } . '" (Document ID: ' . $docid . ')' );
+			EXT_DEBUG && $log->debug( 'Found document "' . $docs->{ $docid }->{ 'fn' } . '" (Document ID: ' . $docid . ')' );
+			EXT_DEBUG && $log->debug( 'Download URL: ' . $docs->{ $docid }->{ 'url' } );
 
 		}
 	}
@@ -209,6 +213,8 @@ sub getDocsList
 	## End the benchmarking
 	$log->debug( 'Document list generated in ' . sprintf( '%.3f', Time::HiRes::tv_interval( $bm_start ) ) . ' seconds' );
 
+	## Return hash table to caller
+	return $docs;
 
 }
 # }}}
@@ -266,6 +272,49 @@ sub getDocIDs
 
 }
 # }}}
+
+### Validate output filename // isValidFile() {{{
+sub isValidFile
+{
+
+	## Get object
+	my ( $self, $dir, $name ) = @_;
+
+	## Don't process if not all arguments are given
+	return undef unless( defined( $dir ) and defined( $name ) );
+
+	## Store timestamp for later usage
+	my $time = time;
+	
+	## Get Logger object
+	my $log = IperBackup::Main::get_logger( 'isValidFile' );
+
+	## Check if output dir is present and writeable
+	my $outdir = $dir if( -w $dir ) || 
+	do{ $log->error( 'Output directory not writeable. Aborting.' ); return undef; };
+
+	## Check if file is already present
+	if( -f $dir . '/' . $name )
+	{
+
+		## Add timestamp to filename if file already present
+		$log->warn( 'File ' . $name . ' is already present. Will save file as: ' . $time . '_' . $name );
+		$self->{ 'filename' } = $dir . '/' . $time . '_' . $name;
+
+	} else {
+
+		## File is not present, so we can safely use the name
+		$self->{ 'filename' } = $dir . '/' . $name;
+
+	}
+
+	## Return the output filename
+	return $self->{ 'filename' };
+
+}
+# }}}
+
+
 
 ## Every module needs a true ending...
 1;
