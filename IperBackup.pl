@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-08-27 15:35:19 ]
+# Last modified: [ 2010-08-27 21:45:07 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -67,6 +67,9 @@ sub main
 		
 	## Read the config file
 	my $myconfig = $conf->readconf();
+
+	## Don't execute anything if no config is present
+	$log->logcroak( 'Unable to execute script, without a config file. Aborting.' ) unless defined( $myconfig );
 	
 	## Create an IperBackup::Download object
 	my $dl = IperBackup::Download->new();
