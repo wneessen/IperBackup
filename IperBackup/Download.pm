@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-08-27 15:29:34 ]
+# Last modified: [ 2010-08-30 17:06:08 ]
 
 ## This is the IperBackup::Process package {{{
 package IperBackup::Download;
@@ -15,7 +15,7 @@ package IperBackup::Download;
 use warnings;
 use strict;
 use Carp qw( carp croak );
-use Data::Dumper;
+#use Data::Dumper;
 use LWP::UserAgent;
 use Time::HiRes;
 use URI;

@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-08-30 16:43:06 ]
+# Last modified: [ 2010-08-30 17:05:57 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -14,7 +14,7 @@ package IperBackup::Main;
 ### Global modules {{{
 use strict;
 use warnings;
-use Data::Dumper; ## Debug only
+#use Data::Dumper; ## Debug only
 use Getopt::Long;
 use IperBackup::Config;
 use IperBackup::Download;
