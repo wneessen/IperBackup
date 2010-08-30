@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-08-27 21:45:07 ]
+# Last modified: [ 2010-08-30 16:43:06 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -111,20 +111,58 @@ sub main
 	## Get list of documents
 	my $documents = $iper->getDocsList();
 
-	## Go through each document and download it
-	foreach my $doc ( keys %{ $documents } )
+	## Decide which action to perform... the real download {{{
+	if( defined( $config->{ 'download' } ) )
 	{
+		
+		## Go through each document and download it
+		foreach my $doc ( keys %{ $documents } )
+		{
 
-		## Make URL easily accessable
-		my $url = $documents->{ $doc }->{ 'url' };
+			## Make URL easily accessable
+			my $url = $documents->{ $doc }->{ 'url' };
 
-		## Generate absolute path to download filename
-		my $file = $iper->isValidFile( $config->{ 'dir' } || OUTDIR, $documents->{ $doc }->{ 'fn' } );
+			## Generate absolute path to download filename
+			my $file = $iper->isValidFile( $config->{ 'dir' } || OUTDIR, $documents->{ $doc }->{ 'fn' } );
 
-		## Download file from Ipernity
-		$dl->download( $url, $file );
+			## Download file from Ipernity
+			$dl->download( $url, $file );
+
+		}
 
 	}
+	# }}}
+
+	## ...or just creating a download list {{{
+	elsif( defined( $config->{ 'list' } ) )
+	{
+
+		## Generate a full absolute path to the DL list
+		my $file = $iper->isValidFile( $config->{ 'dir' } || OUTDIR, 'IperBackup.list' );
+
+		## Inform the user where the DL list will be stored
+		$log->info( 'Creating download link list: ' . $file );
+
+		## Open the list a FH
+		open( FH, '>', $file )
+			or $log->logcroak( 'Unable to write DL list: ' . $! );
+		
+		## Go through each document and download it
+		foreach my $doc ( keys %{ $documents } )
+		{
+
+			## Write it into the list
+			print FH $documents->{ $doc }->{ 'url' } . "\n";
+
+		}
+
+		## Close the FH
+		close( FH );
+
+	}
+	# }}}
+
+
 
 }
 # }}}
