@@ -6,6 +6,26 @@ it fetches all information and downloads every single file or you let
 IperBackup just create a download URL list, which you can use with your
 favourite DL manager.
 
+Requirements
+============
+To use IperBackup your system needs to have the following requirements installed:
+
+	- Perl 5.8.x (or higher)
+	- Ipernity::API 0.06 (or higher)
+	- XML::Simple
+	- LWP::UserAgent
+	- URI
+	- HTTP::Request
+	- Digest::MD5
+	- Log::Log4perl
+	- Getopt::Long
+	- Time::HiRes
+
+If your system is missing one of the required perl modules, you can use CPAN to 
+install them. Check your perl documentation on how to install missing modules.
+
+Usage
+=====
 The usage of IperBackup is pretty simple. First you have to decide which action to use:
 	
 	-l, --list	to create a list with all download URL, to use in your DL manager
