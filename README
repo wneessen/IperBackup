@@ -1,0 +1,39 @@
+IperBackup - a Ipernity backup script
+=====================================
+IperBackup gives you the possibility to completely download all documents in
+you Ipernity account. You can either let IperBackup do all the work, so that
+it fetches all information and downloads every single file or you let
+IperBackup just create a download URL list, which you can use with your
+favourite DL manager.
+
+The usage of IperBackup is pretty simple. First you have to decide which action to use:
+	
+	-l, --list	to create a list with all download URL, to use in your DL manager
+	or
+	-d, --download	to let IperBackup download each file for your
+
+You should also specify an output directory, so IperBackup knows where to store your
+files (or the URL list). If you don't specify the output directory, IperBackup will
+use /var/tmp. The parameter for this is:
+
+	-o, --outdir
+
+You also will need a config file, where you define some parameters, which are mandatory
+to IperBackup (e. g. your API AuthToken and the API UserID). By default IperBackup will
+look for the config file in /etc/IperBackup.conf. If you wanna use another file, just 
+use the:
+
+	-c, --config
+
+parameter to tell IperBackup where to find the config file.
+
+If you haven't specified your API UserID and AuthToken in the config file, IperBackup 
+will generate and fetch both for you, so you can add it to your config file. Once both
+parameters are set in your config file, IperBackup won't bother you about this anymore.
+
+That's all. Have fun using it!
+
+Comments and critics are always welcome at: doomy@pebcak.de
+
+
+$Id$
