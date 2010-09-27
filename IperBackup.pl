@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-09-27 14:23:46 ]
+# Last modified: [ 2010-09-27 14:29:09 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -114,7 +114,7 @@ sub main
 	my $documents = $iper->getDocsList();
 
 	## Inform the user about the number of documents to be fetched
-	$log->info( 'Will fetch ' . scalar( keys %{ $documents } ) . ' documents of the media type(s): ' . join( ', ', split( /,/, $config->{ 'media' } ) ) );
+	$log->info( 'Will fetch ' . scalar( keys %{ $documents } ) . ' documents of the media type(s): ' . join( ', ', split( /,/, $config->{ 'media' } || DEFAULT_MEDIA ) ) );
 
 	## Decide which action to perform... the real download {{{
 	if( defined( $config->{ 'download' } ) )
