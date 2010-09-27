@@ -51,6 +51,15 @@ If you haven't specified your API UserID and AuthToken in the config file, IperB
 will generate and fetch both for you, so you can add it to your config file. Once both
 parameters are set in your config file, IperBackup won't bother you about this anymore.
 
+If you like to fetch only a specific media type (there are: audio, photo, video and 
+other), you can use the -m (or --media) parameter. You can specify just one media type, 
+but also you can specify more media types at once. Here are two examples:
+
+        -m video
+        or
+        --media "video,audio,other"
+
+
 That's all. Have fun using it!
 
 Comments and critics are always welcome at: doomy@pebcak.de

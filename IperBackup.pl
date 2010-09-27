@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-09-27 10:33:08 ]
+# Last modified: [ 2010-09-27 14:23:46 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -24,6 +24,7 @@ use Log::Log4perl qw(:easy);
 # }}}
 
 ### Basic configuration variables {{{
+use constant DEFAULT_MEDIA				=> 'photo,video,audio,other';			## Default media types
 use constant EXT_DEBUG					=> 0;						## Enable extended debug-logging
 use constant LOGLEVEL					=> 'INFO';					## Set the log level
 use constant OUTDIR					=> '/var/tmp';					## Default output directory
@@ -89,6 +90,7 @@ sub main
 	({
 		api	=> $api,
 		config	=> $myconfig,
+		media	=> $config->{ 'media' } || DEFAULT_MEDIA,
 
 	});
 	# }}}
@@ -106,10 +108,13 @@ sub main
 	my $docsnumber = $iper->getNumberDocs();
 
 	## Show user how many docs going to be fetched
-	$log->info( "Found " . $docsnumber . " documents for user account " . $iper->getUserInfo( 'username' ) . " (" . $iper->getUserInfo( 'realname' ) . ")" );
+	$log->info( "Found " . $docsnumber . " documents in total for user account " . $iper->getUserInfo( 'username' ) . " (" . $iper->getUserInfo( 'realname' ) . ")" );
 
 	## Get list of documents
 	my $documents = $iper->getDocsList();
+
+	## Inform the user about the number of documents to be fetched
+	$log->info( 'Will fetch ' . scalar( keys %{ $documents } ) . ' documents of the media type(s): ' . join( ', ', split( /,/, $config->{ 'media' } ) ) );
 
 	## Decide which action to perform... the real download {{{
 	if( defined( $config->{ 'download' } ) )
@@ -179,11 +184,25 @@ sub getArgs
 		'help|h'	=> \$config->{ 'help' },
 		'list|l'	=> \$config->{ 'list' },
 		'download|d'	=> \$config->{ 'download' },
+		'media|m=s'	=> \$config->{ 'media' },
 
 	);
 	showHelp() if( $config->{ 'help' } );
 	showHelp() unless( defined( $config->{ 'list' } ) or defined( $config->{ 'download' } ) );
 	showHelp() if( defined( $config->{ 'list' } ) and defined( $config->{ 'download' } ) );
+	
+	## Check media types
+	if( defined( $config->{ 'media' } ) )
+	{
+
+		## Clean up whitespaces
+		$config->{ 'media' } =~ s/\s//g;
+
+		## Get array of types
+		my @list = split( /,/, $config->{ 'media' } );
+		showHelp() if( scalar( grep( !/\b(photo|audio|video|other)\b/, @list ) ) );
+
+	}
 
 }
 # }}}
@@ -198,6 +217,7 @@ sub showHelp
 	print "\n\t-c, --config\t\tSpecify absolute path to config file (Default: /etc/IperBackup.conf)";
 	print "\n\t-d, --download\t\tTell IperBackup to download all files in your account";
 	print "\n\t-l, --list\t\tTell IperBackup to create a list of files in you account";
+	print "\n\t-m, --media\t\tSpecify which media type to fetch. Possiblities are: audio, photo, other, video (Default: all)";
 	print "\n\t-h, --help\t\tDisplay this help message.\n";
 	print "\n";
 

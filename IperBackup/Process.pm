@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-09-27 10:33:21 ]
+# Last modified: [ 2010-09-27 13:26:04 ]
 
 ## This is the IperBackup::Process package {{{
 package IperBackup::Process;
@@ -50,6 +50,13 @@ sub new
 	if( defined( $args->{ 'config' } ) )
 	{
 		$self->{ 'config' } = $args->{ 'config' };
+
+	}
+	
+	## Get the media type(s)
+	if( defined( $args->{ 'media' } ) )
+	{
+		$self->{ 'media' } = $args->{ 'media' };
 
 	}
 
@@ -127,6 +134,7 @@ sub getNumberDocs
 	(
 
 		method		=> 'user.get',
+		media		=> $self->{ 'media' },
 		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
 
 	);
@@ -231,6 +239,7 @@ sub getNumberPages
 	(
 
 		method		=> 'doc.getList',
+		media		=> $self->{ 'media' },
 		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
 		per_page	=> PER_PAGE,
 
@@ -260,6 +269,7 @@ sub getDocIDs
 	(
 
 		method		=> 'doc.getList',
+		media		=> $self->{ 'media' },
 		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
 		per_page	=> PER_PAGE,
 		page		=> $page,
