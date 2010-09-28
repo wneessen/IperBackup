@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-09-27 13:26:04 ]
+# Last modified: [ 2010-09-28 11:47:56 ]
 
 ## This is the IperBackup::Process package {{{
 package IperBackup::Process;
@@ -22,7 +22,7 @@ use Time::HiRes;
 ## Defined constants {{{
 use constant EXT_DEBUG				=> 0;								## Enable extended debug logging
 use constant PER_PAGE				=> 100;								## Number of documents per page to fetch
-use constant VERSION				=> '0.100';							## This modules version
+use constant VERSION				=> '0.03';							## This modules version
 # }}}
 
 ## Constuctor // new() {{{
@@ -57,6 +57,13 @@ sub new
 	if( defined( $args->{ 'media' } ) )
 	{
 		$self->{ 'media' } = $args->{ 'media' };
+
+	}
+	
+	## Get the tags
+	if( defined( $args->{ 'tags' } ) )
+	{
+		$self->{ 'tags' } = $args->{ 'tags' };
 
 	}
 
@@ -135,12 +142,13 @@ sub getNumberDocs
 
 		method		=> 'user.get',
 		media		=> $self->{ 'media' },
+		tags		=> $self->{ 'tags' } || undef,
 		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
 
 	);
 
 	## Return number of docs to caller
-	return $userinfo->{ 'user' }->{ 'count' }->{ 'docs' } || undef;
+	return $userinfo->{ 'user' }->[0]->{ 'count' }->[0]->{ 'docs' } || undef;
 
 }
 # }}}
@@ -165,7 +173,7 @@ sub getUserInfo
 	);
 
 	## Return requested user information to caller
-	return $userinfo->{ 'user' }->{ $type } || undef;
+	return $userinfo->{ 'user' }->[0]->{ $type } || undef;
 
 }
 # }}}
@@ -191,7 +199,10 @@ sub getDocsList
 
 	## Get number of pages to be fetched
 	my $pages = $self->getNumberPages();
-	$log->debug( 'There a 6 pages of documents (' . PER_PAGE . ' documents each) to be fetched...' );
+	$log->debug( 'There are ' . $pages . ' of documents (' . PER_PAGE . ' documents each) to be fetched...' ) if defined $pages;
+
+	## Don't process if document list is empty
+	return undef unless defined $pages;
 
 	## Retrieve all document ids and URLs from every page
 	for my $page ( 1 .. $pages )
@@ -200,7 +211,7 @@ sub getDocsList
 		## Log a debug message
 		$log->debug( "Retrieving docs from page $page..." );
 
-		## Get document list and run through it
+		## Run through document list
 		foreach my $doc ( @{ $self->getDocIDs( $page ) } )
 		{
 
@@ -208,8 +219,8 @@ sub getDocsList
 			my $docid = $doc->{ 'doc_id' };
 
 			## Store download URL and filename in hash table
-			$docs->{ $docid }->{ 'url' } = $doc->{ 'original' }->{ 'url' };
-			$docs->{ $docid }->{ 'fn' }  = $doc->{ 'original' }->{ 'filename' };
+			$docs->{ $docid }->{ 'url' } = $doc->{ 'original' }->[0]->{ 'url' };
+			$docs->{ $docid }->{ 'fn' }  = $doc->{ 'original' }->[0]->{ 'filename' };
 
 			## Log some ext. debug message
 			EXT_DEBUG && $log->debug( 'Found document "' . $docs->{ $docid }->{ 'fn' } . '" (Document ID: ' . $docid . ')' );
@@ -238,15 +249,17 @@ sub getNumberPages
 	my $docinfo = $self->{ 'api' }->execute_hash
 	(
 
-		method		=> 'doc.getList',
+		method		=> 'doc.search',
+		user_id		=> $self->getUserInfo( 'user_id' ),
 		media		=> $self->{ 'media' },
+		tags		=> $self->{ 'tags' } || undef,
 		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
 		per_page	=> PER_PAGE,
 
 	);
 
 	## Return number of docs to caller
-	return $docinfo->{ 'docs' }->{ 'pages' } || undef;
+	return $docinfo->{ 'docs' }->[0]->{ 'pages' } || undef;
 
 }
 # }}}
@@ -268,7 +281,8 @@ sub getDocIDs
 	my $docinfo = $self->{ 'api' }->execute_hash
 	(
 
-		method		=> 'doc.getList',
+		method		=> 'doc.search',
+		user_id		=> $self->getUserInfo( 'user_id' ),
 		media		=> $self->{ 'media' },
 		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
 		per_page	=> PER_PAGE,
@@ -278,7 +292,7 @@ sub getDocIDs
 	);
 
 	## Return number of docs to caller
-	return $docinfo->{ 'docs' }->{ 'doc' } || undef;
+	return $docinfo->{ 'docs' }->[0]->{ 'doc' } || undef;
 
 }
 # }}}

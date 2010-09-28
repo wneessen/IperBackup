@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-09-27 14:29:09 ]
+# Last modified: [ 2010-09-28 11:52:14 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -28,7 +28,7 @@ use constant DEFAULT_MEDIA				=> 'photo,video,audio,other';			## Default media t
 use constant EXT_DEBUG					=> 0;						## Enable extended debug-logging
 use constant LOGLEVEL					=> 'INFO';					## Set the log level
 use constant OUTDIR					=> '/var/tmp';					## Default output directory
-use constant VERSION					=> '0.01';					## Current version number
+use constant VERSION					=> '0.03';					## Current version number
 # }}}
 
 ## Define global variables {{{
@@ -45,6 +45,17 @@ my $log4perl = q(
 );
 Log::Log4perl->init( \$log4perl );
 Log::Log4perl->wrapper_register(__PACKAGE__);
+# }}}
+
+### Check version of Ipernity::API module {{{
+BEGIN
+{
+
+	my $API = $Ipernity::API::VERSION;
+	do{ print "Ipernity::API v0.07 or higher required.\n"; exit 127; }
+		unless( $API >= 0.07 );
+
+}
 # }}}
 
 ### Main subroutine // main() {{{
@@ -91,6 +102,7 @@ sub main
 		api	=> $api,
 		config	=> $myconfig,
 		media	=> $config->{ 'media' } || DEFAULT_MEDIA,
+		tags	=> $config->{ 'tags' } || undef,
 
 	});
 	# }}}
@@ -113,8 +125,15 @@ sub main
 	## Get list of documents
 	my $documents = $iper->getDocsList();
 
+	## Calculate number of documents to fetch
+	my $docCount = scalar( keys %{ $documents } );
+
+	## Don't process any further if no document was found
+	exit 127 if $docCount == 0;
+
 	## Inform the user about the number of documents to be fetched
 	$log->info( 'Will fetch ' . scalar( keys %{ $documents } ) . ' documents of the media type(s): ' . join( ', ', split( /,/, $config->{ 'media' } || DEFAULT_MEDIA ) ) );
+	$log->info( 'Specified tags: ' . join( ', ', split( /,/, $config->{ 'tags' } ) ) ) if defined $config->{ 'tags' };
 
 	## Decide which action to perform... the real download {{{
 	if( defined( $config->{ 'download' } ) )
@@ -185,6 +204,7 @@ sub getArgs
 		'list|l'	=> \$config->{ 'list' },
 		'download|d'	=> \$config->{ 'download' },
 		'media|m=s'	=> \$config->{ 'media' },
+		'tags|t=s'	=> \$config->{ 'tags' },
 
 	);
 	showHelp() if( $config->{ 'help' } );
@@ -204,6 +224,19 @@ sub getArgs
 
 	}
 
+	## Check tags
+	if( defined( $config->{ 'tags' } ) )
+	{
+
+		## Clean up whitespaces
+		$config->{ 'tags' } =~ s/,\s/,/g;
+
+		## Count number of provided tags
+		my @list = split( /,/, $config->{ 'tags' } );
+		showHelp() if( $#list > 19 );
+
+	}
+
 }
 # }}}
 
@@ -213,13 +246,14 @@ sub showHelp
 
 	## Print message
 	print "Usage: $0 [OPTIONS]\n";
-	print "\n\t-o, --outdir\t\tSpecify absolute path to the output directory (Default: /var/tmp)";
 	print "\n\t-c, --config\t\tSpecify absolute path to config file (Default: /etc/IperBackup.conf)";
 	print "\n\t-d, --download\t\tTell IperBackup to download all files in your account";
+	print "\n\t-h, --help\t\tDisplay this help message.";
 	print "\n\t-l, --list\t\tTell IperBackup to create a list of files in you account";
 	print "\n\t-m, --media\t\tSpecify which media type to fetch. Possiblities are: audio, photo, other, video (Default: all)";
-	print "\n\t-h, --help\t\tDisplay this help message.\n";
-	print "\n";
+	print "\n\t-o, --outdir\t\tSpecify absolute path to the output directory (Default: /var/tmp)";
+	print "\n\t-t, --tags\t\tForce IperBackup to fetch only files with a specific tag (max. 20 tags)";
+	print "\n\n\n";
 
 	## Exit with non-zero error code
 	exit 127;

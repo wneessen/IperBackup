@@ -57,7 +57,15 @@ but also you can specify more media types at once. Here are two examples:
 
         -m video
         or
-        --media "video,audio,other"
+        --media video,audio,other
+
+In case you like to fetch only a documents with a list of specified tags, you can use
+the -t (or --tags) parameter. You can provide one or more tags (up to 20). The search 
+will be more limited, the more tags you provide. Here are two usage examples:
+
+        -t 2009
+        or
+        --tags 2009,cologne,water
 
 
 That's all. Have fun using it!
