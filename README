@@ -67,6 +67,10 @@ will be more limited, the more tags you provide. Here are two usage examples:
         or
         --tags 2009,cologne,water
 
+You also have to the possiblity to fetch comments for each documents (if there
+are some present). Just use the -n (or --comments) parameter and your comments
+will be automatically fetched and stored in the same directory as your output
+directory (with a trailing _comments.txt added to the original filename).
 
 That's all. Have fun using it!
 

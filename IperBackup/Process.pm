@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-09-28 11:47:56 ]
+# Last modified: [ 2010-11-13 00:14:56 ]
 
 ## This is the IperBackup::Process package {{{
 package IperBackup::Process;
@@ -15,6 +15,7 @@ package IperBackup::Process;
 use warnings;
 use strict;
 use Carp qw( carp croak );
+use Encode;
 #use Data::Dumper;
 use Time::HiRes;
 # }}}
@@ -22,7 +23,7 @@ use Time::HiRes;
 ## Defined constants {{{
 use constant EXT_DEBUG				=> 0;								## Enable extended debug logging
 use constant PER_PAGE				=> 100;								## Number of documents per page to fetch
-use constant VERSION				=> '0.03';							## This modules version
+use constant VERSION				=> '0.05';							## This modules version
 # }}}
 
 ## Constuctor // new() {{{
@@ -199,7 +200,7 @@ sub getDocsList
 
 	## Get number of pages to be fetched
 	my $pages = $self->getNumberPages();
-	$log->debug( 'There are ' . $pages . ' of documents (' . PER_PAGE . ' documents each) to be fetched...' ) if defined $pages;
+	$log->debug( 'There are ' . $pages . ' page(s) of documents (' . PER_PAGE . ' documents each) to be fetched...' ) if defined $pages;
 
 	## Don't process if document list is empty
 	return undef unless defined $pages;
@@ -238,6 +239,63 @@ sub getDocsList
 }
 # }}}
 
+### Fetch document comments from Ipernity account // getCommentList() {{{
+sub getCommentList
+{
+
+	## Get object
+	my ( $self, $docID, $pages ) = @_;
+	
+	## Get Logger object
+	my $log = IperBackup::Main::get_logger( 'getCommentList' );
+
+	## Temporary varible for hash table
+	my ( $comments );
+
+	## Start some benchmarking
+	my $bm_start = [ Time::HiRes::gettimeofday ];
+
+	## Log an info message
+	$log->info( 'Retriving list of comments for documents ' . $docID . '...' );
+
+	## Get number of pages to be fetched
+	$log->debug( 'There are ' . $pages . ' page(s) of comments (' . PER_PAGE . ' comments each) to be fetched...' ) if defined $pages;
+
+	## Retrieve all document ids and URLs from every page
+	for my $page ( 1 .. $pages )
+	{
+
+		## Log a debug message
+		$log->debug( "Retrieving comments for document from page $page..." );
+
+		## Run through document list
+		foreach my $comment ( @{ $self->getComments( $page, $docID ) } )
+		{
+
+			## Get comment ID for hash table assignment
+			my $comid = $comment->{ 'comment_id' };
+
+			## Store comment information in hash table
+			$comments->{ $docID }->{ $comid }->{ 'link' }	  = $comment->{ 'link' };
+			$comments->{ $docID }->{ $comid }->{ 'date' }	  = $comment->{ 'posted_at' };
+			$comments->{ $docID }->{ $comid }->{ 'content' }  = $comment->{ 'content' }->{ 'content' };
+			$comments->{ $docID }->{ $comid }->{ 'user_id' }  = $comment->{ 'user_id' };
+			$comments->{ $docID }->{ $comid }->{ 'username' } = $comment->{ 'username' };
+
+			## Log some ext. debug message
+			EXT_DEBUG && $log->debug( 'Found comment "' . $comments->{ $docID }->{ $comid }->{ 'link' } . '" (Comment ID: ' . $comid . ' - by User: ' . $comments->{ $docID }->{ $comid }->{ 'username' } . ')' );
+		}
+	}
+	
+	## End the benchmarking
+	$log->debug( 'Comment list ( ' , scalar keys %{ $comments->{ $docID } } , ' comments ) generated in ' . sprintf( '%.3f', Time::HiRes::tv_interval( $bm_start ) ) . ' seconds' );
+
+	## Return hash table to caller
+	return $comments;
+
+}
+# }}}
+
 ### Retrieve number of pages that have to be fetched // getNumberPages() {{{
 sub getNumberPages
 {
@@ -260,6 +318,30 @@ sub getNumberPages
 
 	## Return number of docs to caller
 	return $docinfo->{ 'docs' }->[0]->{ 'pages' } || undef;
+
+}
+# }}}
+
+### Retrieve number of comment pages that have to be fetched // getCommentNumberPages() {{{
+sub getCommentNumberPages
+{
+
+	## Get object
+	my ( $self, $docID ) = @_;
+
+	## Read documents information via API
+	my $cominfo = $self->{ 'api' }->execute_hash
+	(
+
+		method		=> 'doc.comments.getList',
+		doc_id		=> $docID,
+		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
+		per_page	=> PER_PAGE,
+
+	);
+
+	## Return number of docs to caller
+	return $cominfo->{ 'comments' }->[0]->{ 'pages' } || undef;
 
 }
 # }}}
@@ -293,6 +375,37 @@ sub getDocIDs
 
 	## Return number of docs to caller
 	return $docinfo->{ 'docs' }->[0]->{ 'doc' } || undef;
+
+}
+# }}}
+
+### Retrieve document comments // getComments() {{{
+sub getComments
+{
+
+	## Get object
+	my ( $self, $page, $docID ) = @_;
+
+	## A page number is mandatory
+	return undef unless defined( $page and $docID );
+
+	## Get Logger object
+	my $log = IperBackup::Main::get_logger( 'getComments' );
+
+	## Read documents information via API
+	my $cominfo = $self->{ 'api' }->execute_hash
+	(
+
+		method		=> 'doc.comments.getList',
+		doc_id		=> $docID,
+		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
+		per_page	=> PER_PAGE,
+		page		=> $page,
+
+	);
+
+	## Return number of docs to caller
+	return $cominfo->{ 'comments' }->[0]->{ 'comment' } || undef;
 
 }
 # }}}

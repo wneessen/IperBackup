@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-09-28 11:52:14 ]
+# Last modified: [ 2010-11-13 00:14:34 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -28,7 +28,7 @@ use constant DEFAULT_MEDIA				=> 'photo,video,audio,other';			## Default media t
 use constant EXT_DEBUG					=> 0;						## Enable extended debug-logging
 use constant LOGLEVEL					=> 'INFO';					## Set the log level
 use constant OUTDIR					=> '/var/tmp';					## Default output directory
-use constant VERSION					=> '0.03';					## Current version number
+use constant VERSION					=> '0.04';					## Current version number
 # }}}
 
 ## Define global variables {{{
@@ -149,6 +149,50 @@ sub main
 			## Generate absolute path to download filename
 			my $file = $iper->isValidFile( $config->{ 'dir' } || OUTDIR, $documents->{ $doc }->{ 'fn' } );
 
+			## If we wanna fetch comments, check if there are some
+			if( defined( $config->{ 'comment' } ) )
+			{
+
+				## Get list of comments for the document ID
+				my $commentPages = $iper->getCommentNumberPages( $doc );
+
+				## Don't go any further if is no comment
+				if( defined( $commentPages ) )
+				{
+					
+					## Get comments via API
+					my $comments = $iper->getCommentList( $doc, $commentPages );
+
+					## Log a information message
+					$log->info( 'Storing comments in ' .  $file . '_comments.txt' );
+
+					## Open file to store comments in
+					open( COMMENTS, '>', $file . '_comments.txt' )
+						or $log->logcroak( 'Unable to open ' . $file . '_comments.txt for writing comments.' );
+
+					## Go through each comment we have and store it
+					foreach my $comid ( keys %{ $comments->{ $doc } } )
+					{
+
+						## Store the comment
+						print COMMENTS "Comment ID:\t" . $comid . "\n";
+						print COMMENTS "Comment URL:\t" . $comments->{ $doc }->{ $comid }->{ 'link' } . "\n";
+						print COMMENTS "Written by:\t" . $comments->{ $doc }->{ $comid }->{ 'username' } . " (User ID: " . $comments->{ $doc }->{ $comid }->{ 'user_id' } . ")\n";
+						print COMMENTS "Written on:\t" . scalar localtime( $comments->{ $doc }->{ $comid }->{ 'date' } ) . "\n";
+						print COMMENTS "=" x 72 . "\n";
+						print COMMENTS $comments->{ $doc }->{ $comid }->{ 'content' } . "\n";
+						print COMMENTS "=" x 72 . "\n\n";
+
+					}
+
+					## Close comments file
+					close( COMMENTS );
+
+				}
+
+			}
+
+
 			## Download file from Ipernity
 			$dl->download( $url, $file );
 
@@ -205,11 +249,13 @@ sub getArgs
 		'download|d'	=> \$config->{ 'download' },
 		'media|m=s'	=> \$config->{ 'media' },
 		'tags|t=s'	=> \$config->{ 'tags' },
+		'comments|n'	=> \$config->{ 'comment' },
 
 	);
 	showHelp() if( $config->{ 'help' } );
 	showHelp() unless( defined( $config->{ 'list' } ) or defined( $config->{ 'download' } ) );
 	showHelp() if( defined( $config->{ 'list' } ) and defined( $config->{ 'download' } ) );
+	showHelp() if( defined( $config->{ 'list' } ) and defined( $config->{ 'comment' } ) );
 	
 	## Check media types
 	if( defined( $config->{ 'media' } ) )
@@ -247,6 +293,7 @@ sub showHelp
 	## Print message
 	print "Usage: $0 [OPTIONS]\n";
 	print "\n\t-c, --config\t\tSpecify absolute path to config file (Default: /etc/IperBackup.conf)";
+	print "\n\t-n, --comments\t\tFetch comments of the document if any (only works in download mode)";
 	print "\n\t-d, --download\t\tTell IperBackup to download all files in your account";
 	print "\n\t-h, --help\t\tDisplay this help message.";
 	print "\n\t-l, --list\t\tTell IperBackup to create a list of files in you account";
