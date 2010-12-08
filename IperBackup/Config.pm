@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-09-27 10:33:32 ]
+# Last modified: [ 2010-12-08 16:24:13 ]
 
 ## This is the IperBackup::Config package {{{
 package IperBackup::Config;
@@ -20,7 +20,7 @@ use Carp qw( carp croak );
 ## Defined constants {{{
 use constant CONFFILE				=> '/etc/IperBackup.conf';				## Absolute path to config file if non is defined
 use constant EXT_DEBUG				=> 0;								## Enable extended debug logging
-use constant VERSION				=> '0.100';							## This modules version
+use constant VERSION				=> '0.05';							## This modules version
 # }}}
 
 ## Constuctor // new() {{{

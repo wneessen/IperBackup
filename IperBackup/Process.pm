@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-11-13 00:14:56 ]
+# Last modified: [ 2010-12-08 16:24:17 ]
 
 ## This is the IperBackup::Process package {{{
 package IperBackup::Process;
@@ -23,7 +23,7 @@ use Time::HiRes;
 ## Defined constants {{{
 use constant EXT_DEBUG				=> 0;								## Enable extended debug logging
 use constant PER_PAGE				=> 100;								## Number of documents per page to fetch
-use constant VERSION				=> '0.05';							## This modules version
+use constant VERSION				=> '0.06';							## This modules version
 # }}}
 
 ## Constuctor // new() {{{
@@ -219,9 +219,10 @@ sub getDocsList
 			## Get document ID for hash table assignment
 			my $docid = $doc->{ 'doc_id' };
 
-			## Store download URL and filename in hash table
-			$docs->{ $docid }->{ 'url' } = $doc->{ 'original' }->[0]->{ 'url' };
-			$docs->{ $docid }->{ 'fn' }  = $doc->{ 'original' }->[0]->{ 'filename' };
+			## Store download URL, filename and creation date in hash table
+			$docs->{ $docid }->{ 'url' }	= $doc->{ 'original' }->[0]->{ 'url' };
+			$docs->{ $docid }->{ 'fn' }	= $doc->{ 'original' }->[0]->{ 'filename' };
+			$docs->{ $docid }->{ 'cdate' }  = $doc->{ 'dates' }->[0]->{ 'created' };
 
 			## Log some ext. debug message
 			EXT_DEBUG && $log->debug( 'Found document "' . $docs->{ $docid }->{ 'fn' } . '" (Document ID: ' . $docid . ')' );
@@ -369,7 +370,7 @@ sub getDocIDs
 		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
 		per_page	=> PER_PAGE,
 		page		=> $page,
-		extra		=> 'original',
+		extra		=> 'original,dates',
 
 	);
 

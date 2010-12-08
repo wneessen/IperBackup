@@ -1,15 +1,15 @@
 #!/usr/bin/perl -wt
 #
-# Filename:     IperBackup/Download.pm
-# Description:  Download module to IperBackup
+# Filename:     IperBackup/Update.pm
+# Description:  Update module to IperBackup
 # Creator:      Winfried Neessen <doomy@pebcak.de>
 #
 # $Id$
 #
-# Last modified: [ 2010-12-08 16:24:26 ]
+# Last modified: [ 2010-12-08 16:25:22 ]
 
-## This is the IperBackup::Process package {{{
-package IperBackup::Download;
+## This is the IperBackup::Update package {{{
+package IperBackup::Update;
 
 ## Load some modules {{{
 use warnings;
@@ -17,11 +17,12 @@ use strict;
 use Carp qw( carp croak );
 #use Data::Dumper;
 use LWP::UserAgent;
-use Time::HiRes;
 use URI;
 # }}}
 
 ## Defined constants {{{
+use constant BASE_URL				=> 'http://blog.pebcak.de/tmp/IperBackupVersion.txt';		## URL with version sting of latest release
+use constant DL_URL				=> 'http://svn.neessen.net/listing.php?repname=IperBackup';	## URL where to get latest release
 use constant EXT_DEBUG				=> 0;								## Enable extended debug logging
 use constant VERSION				=> '0.05';							## This modules version
 # }}}
@@ -47,7 +48,7 @@ sub new
 		agent		=> 'IperBackup/v' . VERSION,
 		keep_alive	=> 1,
 		env_proxy	=> 1,
-		show_progress	=> 1,
+		show_progress	=> 0,
 
 	);
 
@@ -57,42 +58,49 @@ sub new
 }
 # }}}
 
-## Download the file // download() {{{
-sub download
+## Check version string of latest release // checkVersion() {{{
+sub checkVersion
 {
 
-	## Get object and URL to fetch
-	my ( $self, $uri, $file ) = @_;
+	## Get object and version of current release
+	my ( $self, $version ) = @_;
 
-	## Don't go further if no URL or filename has been given
-	return undef unless( defined( $uri ) and defined( $file ) );
+	## Don't go further if no version has been given
+	return undef unless( defined( $version ) );
 	
 	## Get Logger object
-	my $log = IperBackup::Main::get_logger( 'download' );
+	my $log = IperBackup::Main::get_logger( 'checkVersion' );
 
 	## Create URI object from uri string
-	my $url = URI->new( $uri );
-
-	## Log an information message
-	$log->info( 'Downloading ' . $url . ' into ' . $file . '...' );
-	
-	## Start some benchmarking
-	my $bm_start = [ Time::HiRes::gettimeofday ];
+	my $url = URI->new( BASE_URL );
 
 	## Create a new HTTP request
-	$self->{ 'request' } = $self->{ 'ua' }->get( $url, ':content_file' => $file );
+	$self->{ 'request' } = $self->{ 'ua' }->get( $url );
 
 	## Download is done... let's see if it was a success
 	if( $self->{ 'request' }->is_success == 1 )
 	{
 
-		## Finish the benchmarking
-		$log->info( 'Download successfully finished in ' . sprintf( '%.3f', Time::HiRes::tv_interval( $bm_start ) ) . ' seconds' );
+		## Store latest version in object
+		$self->{ 'latest' } = $self->{ 'request' }->decoded_content;
+		chomp( $self->{ 'latest' } );
 
 	} else {
 
 		## The download was not successfull
-		$log->error( 'Download unsuccessfully finished.' );
+		$log->warn( 'Couldn\'t fetch version information.' );
+
+	}
+
+	## Check if latest version is higher than current
+	if( $self->{ 'latest' } > $version )
+	{
+
+		print "A new version of IperBackup is available. You are currently using v" . $version . ", but\n";
+		print "the latest available version is v" . $self->{ 'latest' } . "\n\n";
+		print "It is recommended to upgrade to the latest release. Find it at:\n";
+		print DL_URL . "\n";
+		my $foo = <STDIN>;
 
 	}
 

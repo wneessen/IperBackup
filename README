@@ -11,7 +11,8 @@ Requirements
 To use IperBackup your system needs to have the following requirements installed:
 
 	- Perl 5.8.x (or higher)
-	- Ipernity::API 0.06 (or higher)
+	- Ipernity::API 0.08 (or higher)
+	- Date::Manip
 	- XML::Simple
 	- LWP::UserAgent
 	- URI
@@ -21,8 +22,26 @@ To use IperBackup your system needs to have the following requirements installed
 	- Getopt::Long
 	- Time::HiRes
 
-If your system is missing one of the required perl modules, you can use CPAN to 
-install them. Check your perl documentation on how to install missing modules.
+CPAN 101
+========
+To check if the corresponding perl module is installed, you can use the
+following command:
+
+	perl -M<module name> -eprint
+	e. g.: perl -MIpernity::API -eprint
+
+If this command returns an error message, the module is missing on your
+system. If nothing is returned, everything is fine.
+
+To install a module, the easiest way is to use CPAN. CPAN is the
+"Comprehensive Perl Archive Network". To install a module you can use the
+follwoing command.
+
+	perl -MCPAN -eshell
+
+This will start the CPAN shell for you. Once you see the "cpan>" prompt,
+just enter "install <module name>" and CPAN will fetch the module and 
+install it locally on your system
 
 Usage
 =====
@@ -70,7 +89,10 @@ will be more limited, the more tags you provide. Here are two usage examples:
 You also have to the possiblity to fetch comments for each documents (if there
 are some present). Just use the -n (or --comments) parameter and your comments
 will be automatically fetched and stored in the same directory as your output
-directory (with a trailing _comments.txt added to the original filename).
+directory (with a trailing _comments.txt added to the original filename). If
+you already fetched all your files, but forgot the comments, you can add the 
+"--commentsonly" parameter to your download job and it will only fetch the 
+comments and store them into the output directory.
 
 That's all. Have fun using it!
 

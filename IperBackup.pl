@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-11-13 00:14:34 ]
+# Last modified: [ 2010-12-08 16:23:38 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -15,10 +15,12 @@ package IperBackup::Main;
 use strict;
 use warnings;
 #use Data::Dumper; ## Debug only
+use Date::Manip;
 use Getopt::Long;
 use IperBackup::Config;
 use IperBackup::Download;
 use IperBackup::Process;
+use IperBackup::Update;
 use Ipernity::API;
 use Log::Log4perl qw(:easy);
 # }}}
@@ -28,7 +30,7 @@ use constant DEFAULT_MEDIA				=> 'photo,video,audio,other';			## Default media t
 use constant EXT_DEBUG					=> 0;						## Enable extended debug-logging
 use constant LOGLEVEL					=> 'INFO';					## Set the log level
 use constant OUTDIR					=> '/var/tmp';					## Default output directory
-use constant VERSION					=> '0.04';					## Current version number
+use constant VERSION					=> '0.05';					## Current version number
 # }}}
 
 ## Define global variables {{{
@@ -52,8 +54,8 @@ BEGIN
 {
 
 	my $API = $Ipernity::API::VERSION;
-	do{ print "Ipernity::API v0.07 or higher required.\n"; exit 127; }
-		unless( $API >= 0.07 );
+	do{ print "Ipernity::API v0.08 or higher required.\n"; exit 127; }
+		unless( $API >= 0.08 );
 
 }
 # }}}
@@ -64,6 +66,9 @@ sub main
 
 	## Get a log object
 	my $log = get_logger('Main');
+
+	## Check for updates
+	checkUpdate();
 
 	## Read command line arguments
 	getArgs();
@@ -192,9 +197,29 @@ sub main
 
 			}
 
+			## Download file (if commentsonly is not set)
+			unless( defined( $config->{ 'commentsonly' } ) )
+			{
 
-			## Download file from Ipernity
-			$dl->download( $url, $file );
+				## Download file from Ipernity
+				$dl->download( $url, $file );
+
+				## Change date of downloaded file to creation date
+				if( defined( $documents->{ $doc }->{ 'cdate' } ) and -f $file )
+				{
+			
+					## Log a information message
+					$log->info( 'Changing creation date of file to: ' . $documents->{ $doc }->{ 'cdate' } );
+
+					## Convert date to unix timestamp
+					my $cdate = UnixDate( $documents->{ $doc }->{ 'cdate' }, '%s' );
+
+					## Update timestamp of downloaded file
+					utime( $cdate, $cdate, $file );
+
+				}
+
+			}
 
 		}
 
@@ -250,6 +275,7 @@ sub getArgs
 		'media|m=s'	=> \$config->{ 'media' },
 		'tags|t=s'	=> \$config->{ 'tags' },
 		'comments|n'	=> \$config->{ 'comment' },
+		'commentsonly'	=> \$config->{ 'commentsonly' },
 
 	);
 	showHelp() if( $config->{ 'help' } );
@@ -282,6 +308,19 @@ sub getArgs
 		showHelp() if( $#list > 19 );
 
 	}
+
+}
+# }}}
+
+### Use IperBackup::Update to check for latest updates // checkUpdate() {{{
+sub checkUpdate
+{
+
+	## Create an IperBackup::Update object
+	my $update = IperBackup::Update->new();
+
+	## Check if a new version is available
+	$update->checkVersion( VERSION );
 
 }
 # }}}
