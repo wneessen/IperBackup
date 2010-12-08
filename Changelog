@@ -1,0 +1,31 @@
+IperBackup v0.05 // 2010-12-08
+==============================
+- Added "commentsonly" feature (requested by Sascha Assbach)
+- Added "Update notification" feature. IperBackup will notify you whenever a new release 
+  of IperBackup is available
+- Creation date of downloaded files, will be changed according to the "creation date" of 
+  the picture at Ipernity if available. (requested by Michael Behrens)
+- Documentation update
+- Added "CPAN 101" to README
+- Important: This release requires Ipernity::API 0.08 or higher
+
+IperBackup v0.04 // 2010-11-13
+==============================
+- Added "comments" download feature
+
+IperBackup v0.03 // 2010-09-28
+==============================
+- Added possibility to search tags
+- Bugfixes in document search
+- Important: This release requires Ipernity::API 0.07 or higher
+
+IperBackup v0.02 // 2010-09-27
+==============================
+- Added possibility to fetch only specific media types
+- Documentation update
+
+IperBackup v0.01 // 2010-09-26
+==============================
+- First official release
+
+$Id$
