@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-12-08 16:23:38 ]
+# Last modified: [ 2010-12-10 09:50:37 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -278,10 +278,16 @@ sub getArgs
 		'commentsonly'	=> \$config->{ 'commentsonly' },
 
 	);
+	
+	## Download mode is implied for commentsonly mode
+	$config->{ 'download' } = 1 if( defined( $config->{ 'commentsonly' } ) );
+
+	## Check for conflicts
 	showHelp() if( $config->{ 'help' } );
 	showHelp() unless( defined( $config->{ 'list' } ) or defined( $config->{ 'download' } ) );
 	showHelp() if( defined( $config->{ 'list' } ) and defined( $config->{ 'download' } ) );
 	showHelp() if( defined( $config->{ 'list' } ) and defined( $config->{ 'comment' } ) );
+
 	
 	## Check media types
 	if( defined( $config->{ 'media' } ) )
