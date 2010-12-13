@@ -1,3 +1,9 @@
+IperBackup v0.06 // 2010-12-13
+==============================
+- Added start-/enddate feature
+- "download" mode is now implied when using "commentsonly" parameter
+- Code cleanup
+
 IperBackup v0.05 // 2010-12-08
 ==============================
 - Added "commentsonly" feature (requested by Sascha Assbach)

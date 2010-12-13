@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-12-08 16:24:13 ]
+# Last modified: [ 2010-12-13 15:37:20 ]
 
 ## This is the IperBackup::Config package {{{
 package IperBackup::Config;
@@ -28,8 +28,7 @@ sub new
 {
 
 	## Read arguments
-	my $class = shift;
-	my $args = shift;
+	my ( $class, %args ) = @_;
 
 	## Get Logger object
 	my $log = IperBackup::Main::get_logger( 'new' );
@@ -38,15 +37,7 @@ sub new
 	my $self = bless {}, $class;
 
 	## Get the absolute path to the config file
-	if( defined( $args->{ 'conf_file' } ) )
-	{
-		$self->{ 'conf_file' } = $args->{ 'conf_file' };
-
-	} else {
-		
-		$self->{ 'conf_file' } = CONFFILE;
-
-	}
+	$self->{ 'conf_file' }	= delete( $args{ 'conf_file' } ) || CONFFILE;
 
 	## Config file needs to be set for this object
 	unless( defined( $self->{ 'conf_file' } ) )
@@ -77,7 +68,7 @@ sub readconf
 	## Die if the conffile is non-present
 	unless( defined( $conffile ) ) 
 	{
-		$log->error( 'Config file not present. Aborting.' );
+		$log->error( 'Config file ' . $self->{ 'conf_file' } . ' not present. Aborting.' );
 		return undef;
 	}
 

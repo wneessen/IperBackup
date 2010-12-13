@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-12-08 16:24:17 ]
+# Last modified: [ 2010-12-13 15:32:36 ]
 
 ## This is the IperBackup::Process package {{{
 package IperBackup::Process;
@@ -15,6 +15,7 @@ package IperBackup::Process;
 use warnings;
 use strict;
 use Carp qw( carp croak );
+use Date::Manip;
 use Encode;
 #use Data::Dumper;
 use Time::HiRes;
@@ -31,8 +32,7 @@ sub new
 {
 
 	## Read arguments
-	my $class = shift;
-	my $args = shift;
+	my ( $class, %args ) = @_;
 
 	## Get Logger object
 	my $log = IperBackup::Main::get_logger( 'new' );
@@ -41,32 +41,12 @@ sub new
 	my $self = bless {}, $class;
 
 	## Get the API object
-	if( defined( $args->{ 'api' } ) )
-	{
-		$self->{ 'api' } = $args->{ 'api' };
-
-	}
-	
-	## Get the config object
-	if( defined( $args->{ 'config' } ) )
-	{
-		$self->{ 'config' } = $args->{ 'config' };
-
-	}
-	
-	## Get the media type(s)
-	if( defined( $args->{ 'media' } ) )
-	{
-		$self->{ 'media' } = $args->{ 'media' };
-
-	}
-	
-	## Get the tags
-	if( defined( $args->{ 'tags' } ) )
-	{
-		$self->{ 'tags' } = $args->{ 'tags' };
-
-	}
+	$self->{ 'api' }	= delete( $args{ 'api' } );
+	$self->{ 'config' }	= delete( $args{ 'config' } );
+	$self->{ 'media' }	= delete( $args{ 'media' } );
+	$self->{ 'tags' }	= delete( $args{ 'tags' } );
+	$self->{ 'startdate' }	= delete( $args{ 'startdate' } );
+	$self->{ 'enddate' }	= delete( $args{ 'enddate' } );
 
 	## API object needs to be provided
 	unless( defined( $self->{ 'api' } ) )
@@ -197,6 +177,9 @@ sub getDocsList
 
 	## Log an info message
 	$log->info( 'Retriving list of documents to be fetched...' );
+	
+	## If start/end date is defined show another log message
+	$log->info( 'Specified timeframe: ' . UnixDate( $self->{ 'startdate' } || '1970-01-01 00:00:00 UTC', '%Y-%m-%d %H:%M:%S' ) . ' to ' . UnixDate( $self->{ 'enddate' } || 'now', '%Y-%m-%d %H:%M:%S' ) );
 
 	## Get number of pages to be fetched
 	my $pages = $self->getNumberPages();
@@ -313,6 +296,8 @@ sub getNumberPages
 		media		=> $self->{ 'media' },
 		tags		=> $self->{ 'tags' } || undef,
 		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
+		posted_min	=> UnixDate( $self->{ 'startdate' } || '1970-01-01 00:00:00 UTC', '%s' ),
+		posted_max	=> UnixDate( $self->{ 'enddate' } || 'now', '%s' ),
 		per_page	=> PER_PAGE,
 
 	);
@@ -368,6 +353,8 @@ sub getDocIDs
 		user_id		=> $self->getUserInfo( 'user_id' ),
 		media		=> $self->{ 'media' },
 		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
+		posted_min	=> UnixDate( $self->{ 'startdate' } || '1970-01-01 00:00:00 UTC', '%s' ),
+		posted_max	=> UnixDate( $self->{ 'enddate' } || 'now', '%s' ),
 		per_page	=> PER_PAGE,
 		page		=> $page,
 		extra		=> 'original,dates',

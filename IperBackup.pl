@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-12-10 09:50:37 ]
+# Last modified: [ 2010-12-13 15:37:52 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -30,7 +30,7 @@ use constant DEFAULT_MEDIA				=> 'photo,video,audio,other';			## Default media t
 use constant EXT_DEBUG					=> 0;						## Enable extended debug-logging
 use constant LOGLEVEL					=> 'INFO';					## Set the log level
 use constant OUTDIR					=> '/var/tmp';					## Default output directory
-use constant VERSION					=> '0.05';					## Current version number
+use constant VERSION					=> '0.06';					## Current version number
 # }}}
 
 ## Define global variables {{{
@@ -75,11 +75,11 @@ sub main
 	
 	## Create a config object {{{
 	my $conf = IperBackup::Config->new
-	({
+	(
 
 		conf_file	=> $config->{ 'conffile' },
 
-	});
+	);
 	# }}}
 		
 	## Read the config file
@@ -103,13 +103,15 @@ sub main
 	
 	## Create an IperBackup::Process object {{{
 	my $iper = IperBackup::Process->new
-	({
-		api	=> $api,
-		config	=> $myconfig,
-		media	=> $config->{ 'media' } || DEFAULT_MEDIA,
-		tags	=> $config->{ 'tags' } || undef,
+	(
+		api		=> $api,
+		config		=> $myconfig,
+		media		=> $config->{ 'media' } || DEFAULT_MEDIA,
+		tags		=> $config->{ 'tags' } || undef,
+		startdate	=> $config->{ 'startdate' } || undef,
+		enddate		=> $config->{ 'enddate' } || undef,
 
-	});
+	);
 	# }}}
 
 	## An authtoken is mandatory, fetch one if non-existant {{{
@@ -276,6 +278,8 @@ sub getArgs
 		'tags|t=s'	=> \$config->{ 'tags' },
 		'comments|n'	=> \$config->{ 'comment' },
 		'commentsonly'	=> \$config->{ 'commentsonly' },
+		'startdate|s=s'	=> \$config->{ 'startdate' },
+		'enddate|e=s'	=> \$config->{ 'enddate' },
 
 	);
 	
