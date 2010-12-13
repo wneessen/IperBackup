@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-12-08 16:25:22 ]
+# Last modified: [ 2010-12-13 15:55:50 ]
 
 ## This is the IperBackup::Update package {{{
 package IperBackup::Update;
@@ -22,7 +22,7 @@ use URI;
 
 ## Defined constants {{{
 use constant BASE_URL				=> 'http://blog.pebcak.de/tmp/IperBackupVersion.txt';		## URL with version sting of latest release
-use constant DL_URL				=> 'http://svn.neessen.net/listing.php?repname=IperBackup';	## URL where to get latest release
+use constant DL_URL				=> 'http://nop.li/iperbackup';					## URL where to get latest release
 use constant EXT_DEBUG				=> 0;								## Enable extended debug logging
 use constant VERSION				=> '0.05';							## This modules version
 # }}}
