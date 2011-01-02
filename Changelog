@@ -1,3 +1,8 @@
+IperBackup v0.07 // 2011-01-02
+==============================
+- Added possibilty to fetch document permissions from Ipernity (Requested by @maxheadroom)
+  http://iperbackup.my-webspace.org/index.php?p=/discussion/3/is-it-possible-to-retrieve-the-permissions-for-each-document-from-ipernity
+
 IperBackup v0.06 // 2010-12-13
 ==============================
 - Added start-/enddate feature

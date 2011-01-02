@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-12-13 15:32:36 ]
+# Last modified: [ 2011-01-02 20:27:52 ]
 
 ## This is the IperBackup::Process package {{{
 package IperBackup::Process;
@@ -47,6 +47,7 @@ sub new
 	$self->{ 'tags' }	= delete( $args{ 'tags' } );
 	$self->{ 'startdate' }	= delete( $args{ 'startdate' } );
 	$self->{ 'enddate' }	= delete( $args{ 'enddate' } );
+	$self->{ 'permission' }	= delete( $args{ 'permission' } );
 
 	## API object needs to be provided
 	unless( defined( $self->{ 'api' } ) )
@@ -398,12 +399,52 @@ sub getComments
 }
 # }}}
 
+### Get permission for document from Ipernity // getPermission() {{{
+sub getPermission
+{
+
+	## Get object
+	my ( $self, $doc ) = @_;
+
+	## A document id is mandatory
+	return undef unless defined( $doc );
+	
+	## Get Logger object
+	my $log = IperBackup::Main::get_logger( 'getPermission' );
+
+	## Read documents information via API
+	my $permission = $self->{ 'api' }->execute_hash
+	(
+
+		method		=> 'doc.getPerms',
+		doc_id		=> $doc,
+		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
+
+	);
+
+	## Set up permission / name hash
+	my %perm = (
+
+		0	=> 'perm_private',
+		1	=> 'perm_familyonly',
+		2	=> 'perm_friendonly',
+		3	=> 'perm_familyandfriend',
+		4	=> 'perm_public',
+
+	);
+
+	## Return the permission name
+	return $perm{ $permission->{ 'visibility' }->[0]->{ 'share' } };
+
+}
+# }}}
+
 ### Validate output filename // isValidFile() {{{
 sub isValidFile
 {
 
 	## Get object
-	my ( $self, $dir, $name ) = @_;
+	my ( $self, $dir, $name, $doc ) = @_;
 
 	## Don't process if not all arguments are given
 	return undef unless( defined( $dir ) and defined( $name ) );
@@ -417,6 +458,9 @@ sub isValidFile
 	## Check if output dir is present and writeable
 	my $outdir = $dir if( -w $dir ) || 
 	do{ $log->error( 'Output directory not writeable. Aborting.' ); return undef; };
+	
+	## If user requested to fetch permissions, let get the permission right now
+	my $perm = $self->getPermission( $doc ) if defined( $self->{ 'permission' } and defined( $doc ) );
 
 	## Check if file is already present
 	if( -f $dir . '/' . $name )
@@ -424,15 +468,33 @@ sub isValidFile
 
 		## Add timestamp to filename if file already present
 		$log->warn( 'File ' . $name . ' is already present. Will save file as: ' . $time . '_' . $name );
-		$self->{ 'filename' } = $dir . '/' . $time . '_' . $name;
+
+		if( defined( $perm ) )
+		{
+			$self->{ 'filename' } = $dir . '/' . $perm . '-' . $time . '_' . $name;
+
+		} else {
+			
+			$self->{ 'filename' } = $dir . '/' . $time . '_' . $name;
+
+		}
 
 	} else {
 
 		## File is not present, so we can safely use the name
-		$self->{ 'filename' } = $dir . '/' . $name;
+		if( defined( $perm ) )
+		{
+		
+			$self->{ 'filename' } = $dir . '/' . $perm . '-' . $name;
+
+		} else {
+			
+			$self->{ 'filename' } = $dir . '/' . $name;
+
+		}
 
 	}
-
+	
 	## Return the output filename
 	return $self->{ 'filename' };
 

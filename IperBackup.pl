@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-12-13 15:37:52 ]
+# Last modified: [ 2011-01-02 20:28:30 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -30,7 +30,7 @@ use constant DEFAULT_MEDIA				=> 'photo,video,audio,other';			## Default media t
 use constant EXT_DEBUG					=> 0;						## Enable extended debug-logging
 use constant LOGLEVEL					=> 'INFO';					## Set the log level
 use constant OUTDIR					=> '/var/tmp';					## Default output directory
-use constant VERSION					=> '0.06';					## Current version number
+use constant VERSION					=> '0.07';					## Current version number
 # }}}
 
 ## Define global variables {{{
@@ -110,6 +110,7 @@ sub main
 		tags		=> $config->{ 'tags' } || undef,
 		startdate	=> $config->{ 'startdate' } || undef,
 		enddate		=> $config->{ 'enddate' } || undef,
+		permission	=> $config->{ 'permission' } || undef,
 
 	);
 	# }}}
@@ -154,7 +155,7 @@ sub main
 			my $url = $documents->{ $doc }->{ 'url' };
 
 			## Generate absolute path to download filename
-			my $file = $iper->isValidFile( $config->{ 'dir' } || OUTDIR, $documents->{ $doc }->{ 'fn' } );
+			my $file = $iper->isValidFile( $config->{ 'dir' } || OUTDIR, $documents->{ $doc }->{ 'fn' }, $doc );
 
 			## If we wanna fetch comments, check if there are some
 			if( defined( $config->{ 'comment' } ) )
@@ -233,7 +234,7 @@ sub main
 	{
 
 		## Generate a full absolute path to the DL list
-		my $file = $iper->isValidFile( $config->{ 'dir' } || OUTDIR, 'IperBackup.list' );
+		my $file = $iper->isValidFile( $config->{ 'dir' } || OUTDIR, 'IperBackup.list', undef );
 
 		## Inform the user where the DL list will be stored
 		$log->info( 'Creating download link list: ' . $file );
@@ -280,6 +281,7 @@ sub getArgs
 		'commentsonly'	=> \$config->{ 'commentsonly' },
 		'startdate|s=s'	=> \$config->{ 'startdate' },
 		'enddate|e=s'	=> \$config->{ 'enddate' },
+		'permission|p'	=> \$config->{ 'permission' },
 
 	);
 	
@@ -342,12 +344,16 @@ sub showHelp
 	## Print message
 	print "Usage: $0 [OPTIONS]\n";
 	print "\n\t-c, --config\t\tSpecify absolute path to config file (Default: /etc/IperBackup.conf)";
-	print "\n\t-n, --comments\t\tFetch comments of the document if any (only works in download mode)";
+	print "\n\t--comentsonly\t\tDownload comments only";
 	print "\n\t-d, --download\t\tTell IperBackup to download all files in your account";
+	print "\n\t-e, --enddate\t\tSpecify the maximum date of documents you are searching";
 	print "\n\t-h, --help\t\tDisplay this help message.";
 	print "\n\t-l, --list\t\tTell IperBackup to create a list of files in you account";
 	print "\n\t-m, --media\t\tSpecify which media type to fetch. Possiblities are: audio, photo, other, video (Default: all)";
+	print "\n\t-n, --comments\t\tFetch comments of the document if any (only works in download mode)";
 	print "\n\t-o, --outdir\t\tSpecify absolute path to the output directory (Default: /var/tmp)";
+	print "\n\t-p, --permission\t\tTell IperBackup to add the permission type to the filename";
+	print "\n\t-s, --startdate\t\tSpecify the minimum date of documents you are searching";
 	print "\n\t-t, --tags\t\tForce IperBackup to fetch only files with a specific tag (max. 20 tags)";
 	print "\n\n\n";
 
