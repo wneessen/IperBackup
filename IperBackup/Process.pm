@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2011-01-05 00:14:07 ]
+# Last modified: [ 2011-01-05 00:50:50 ]
 
 ## This is the IperBackup::Process package {{{
 package IperBackup::Process;
@@ -24,7 +24,7 @@ use Time::HiRes;
 ## Defined constants {{{
 use constant EXT_DEBUG				=> 0;								## Enable extended debug logging
 use constant PER_PAGE				=> 100;								## Number of documents per page to fetch
-use constant VERSION				=> '0.07';							## This modules version
+use constant VERSION				=> '0.08';							## This modules version
 # }}}
 
 ## Constuctor // new() {{{
@@ -41,13 +41,14 @@ sub new
 	my $self = bless {}, $class;
 
 	## Get the API object
-	$self->{ 'api' }	= delete( $args{ 'api' } );
-	$self->{ 'config' }	= delete( $args{ 'config' } );
-	$self->{ 'media' }	= delete( $args{ 'media' } );
-	$self->{ 'tags' }	= delete( $args{ 'tags' } );
-	$self->{ 'startdate' }	= delete( $args{ 'startdate' } );
-	$self->{ 'enddate' }	= delete( $args{ 'enddate' } );
-	$self->{ 'nopermission' }= delete( $args{ 'nopermission' } );
+	$self->{ 'api' }	  = delete( $args{ 'api' } );
+	$self->{ 'config' }	  = delete( $args{ 'config' } );
+	$self->{ 'media' }	  = delete( $args{ 'media' } );
+	$self->{ 'tags' }	  = delete( $args{ 'tags' } );
+	$self->{ 'startdate' }	  = delete( $args{ 'startdate' } );
+	$self->{ 'enddate' }	  = delete( $args{ 'enddate' } );
+	$self->{ 'nopermission' } = delete( $args{ 'nopermission' } );
+	$self->{ 'timestamp' }	  = delete( $args{ 'timestamp' } );
 
 	## API object needs to be provided
 	unless( defined( $self->{ 'api' } ) )
@@ -462,33 +463,70 @@ sub isValidFile
 	## If user requested to fetch permissions, let get the permission right now
 	my $perm = $self->getPermission( $doc ) unless defined( $self->{ 'nopermission' } and defined( $doc ) );
 
-	## Check if file is already present
-	if( -f $dir . '/' . $name )
+	## We wanna store the permissions
+	if( defined( $perm ) )
 	{
-
-		## Add timestamp to filename if file already present
-		$log->warn( 'File ' . $name . ' is already present. Will save file as: ' . $time . '_' . $name );
-
-		if( defined( $perm ) )
+		
+		## Check if file is already present
+		if( -f $dir . '/' . $perm . '-' . $name )
 		{
-			$self->{ 'filename' } = $dir . '/' . $perm . '-' . $time . '_' . $name;
+			
+			## Check if timestamp-feature has been enabled
+			if( $self->{ 'timestamp' } )
+			{
+
+				## Add timestamp to filename if file already present
+				$log->info( 'File ' . $name . ' is already present. Will save file as: ' . $perm . '-' . $time . '_' . $name );
+
+				## Set correct filename
+				$self->{ 'filename' } = $dir . '/' . $perm . '-' . $time . '_' . $name;
+
+			} else {
+			
+				## Log an information message
+				$log->info( 'File ' . $name . ' is already present. Skipping to next document.' );
+
+				## Set ___SKIP___ tag as filename
+				$self->{ 'filename' } = '___SKIP___';
+
+			}
 
 		} else {
-			
-			$self->{ 'filename' } = $dir . '/' . $time . '_' . $name;
+		
+			## We are save to use the default filename
+			$self->{ 'filename' } = $dir . '/' . $perm . '-' . $name;
 
 		}
 
 	} else {
-
-		## File is not present, so we can safely use the name
-		if( defined( $perm ) )
-		{
 		
-			$self->{ 'filename' } = $dir . '/' . $perm . '-' . $name;
+		## Check if file is already present
+		if( -f $dir . '/' . $name )
+		{
+			
+			## Check if timestamp-feature has been enabled
+			if( $self->{ 'timestamp' } )
+			{
+
+				## Add timestamp to filename if file already present
+				$log->info( 'File ' . $name . ' is already present. Will save file as: ' . $time . '_' . $name );
+
+				## Set correct filename
+				$self->{ 'filename' } = $dir . '/' . $time . '_' . $name;
+
+			} else {
+			
+				## Log an information message
+				$log->info( 'File ' . $name . ' is already present. Skipping to next document.' );
+
+				## Set ___SKIP___ tag as filename
+				$self->{ 'filename' } = '___SKIP___';
+
+			}
 
 		} else {
-			
+		
+			## We are save to use the default filename
 			$self->{ 'filename' } = $dir . '/' . $name;
 
 		}

@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2011-01-04 22:20:31 ]
+# Last modified: [ 2011-01-05 00:50:45 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -30,7 +30,7 @@ use constant DEFAULT_MEDIA				=> 'photo,video,audio,other';			## Default media t
 use constant EXT_DEBUG					=> 0;						## Enable extended debug-logging
 use constant LOGLEVEL					=> 'INFO';					## Set the log level
 use constant OUTDIR					=> '/var/tmp';					## Default output directory
-use constant VERSION					=> '0.07';					## Current version number
+use constant VERSION					=> '0.08';					## Current version number
 # }}}
 
 ## Define global variables {{{
@@ -111,6 +111,7 @@ sub main
 		startdate	=> $config->{ 'startdate' } || undef,
 		enddate		=> $config->{ 'enddate' } || undef,
 		nopermission	=> $config->{ 'nopermission' } || undef,
+		timestamp	=> $config->{ 'timestamp' } || undef,
 
 	);
 	# }}}
@@ -156,6 +157,9 @@ sub main
 
 			## Generate absolute path to download filename
 			my $file = $iper->isValidFile( $config->{ 'dir' } || OUTDIR, $documents->{ $doc }->{ 'fn' }, $doc );
+
+			## Skip file if already present
+			next if $file eq '___SKIP___';
 
 			## If we wanna fetch comments, check if there are some
 			if( defined( $config->{ 'comment' } ) )
@@ -280,6 +284,8 @@ sub getArgs
 		'startdate|s=s'	=> \$config->{ 'startdate' },
 		'enddate|e=s'	=> \$config->{ 'enddate' },
 		'nopermission|p'=> \$config->{ 'nopermission' },
+		'timestamp|ts'	=> \$config->{ 'timestamp' },
+		'version|v'	=> \$config->{ 'version' },
 
 	);
 	
@@ -292,6 +298,8 @@ sub getArgs
 	showHelp() if( defined( $config->{ 'list' } ) and defined( $config->{ 'download' } ) );
 	showHelp() if( defined( $config->{ 'list' } ) and defined( $config->{ 'comment' } ) );
 
+	## Print version string if requested
+	do { print "This is IperBackup v" . VERSION . " // (C) 2010-2011 Winfried Neessen\n"; exit 0 } if( defined( $config->{ 'version' } ) );
 	
 	## Check media types
 	if( defined( $config->{ 'media' } ) )
@@ -350,9 +358,11 @@ sub showHelp
 	print "\n\t-m, --media\t\tSpecify which media type to fetch. Possiblities are: audio, photo, other, video (Default: all)";
 	print "\n\t-n, --comments\t\tFetch comments of the document if any (only works in download mode)";
 	print "\n\t-o, --outdir\t\tSpecify absolute path to the output directory (Default: /var/tmp)";
-	print "\n\t-p, --nopermission\t\tTell IperBackup to not add the permission type to the filename";
+	print "\n\t-p, --nopermission\tTell IperBackup to not add the permission type to the filename";
 	print "\n\t-s, --startdate\t\tSpecify the minimum date of documents you are searching";
 	print "\n\t-t, --tags\t\tForce IperBackup to fetch only files with a specific tag (max. 20 tags)";
+	print "\n\t-ts, --timestamp\tIf a document is already present, IperBackup will add a timestamp and redownload the document";
+	print "\n\t-v, --version\t\tShow version string";
 	print "\n\n\n";
 
 	## Exit with non-zero error code
