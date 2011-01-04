@@ -109,12 +109,13 @@ The specified date has to be UTC. If you leave the start date it will use the
 start of the UNIX epoch time (1970-01-01 00:00:00) and if you leave out the
 end date it will use the current time.
 
-If you want to have your Ipernity permission for each picture to be safed
-in the local filename use this switch:
-   -p or --permission
+By default IperBackup will fetch the permissions (Ipernity-wise) for each
+document and will store it in the filename. The permission string will be
+stored in the beginning of the filename. The result will look something
+like this: perm_public-<original filename>. You can disable this behaviour
+by using this switch:
 
-This will put a string representing the permission at the beginning of the filename.
-The result will look something like: perm_public-<original filename>
+	-p or --nopermission
 
 That's all. Have fun using it!
 
