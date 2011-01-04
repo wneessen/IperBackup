@@ -8,7 +8,8 @@ favourite DL manager.
 
 Requirements
 ============
-To use IperBackup your system needs to have the following requirements installed:
+To use IperBackup your system needs to have the following requirements installed 
+(best installed from bottom to top):
 
 	- Perl 5.8.x (or higher)
 	- Ipernity::API 0.08 (or higher)
@@ -50,6 +51,9 @@ The usage of IperBackup is pretty simple. First you have to decide which action 
 	-l, --list	to create a list with all download URL, to use in your DL manager
 	or
 	-d, --download	to let IperBackup download each file for your
+	
+	the options are mutual exclusive and mandatory. Otherwise IperBackup
+	will just display the help output.
 
 You should also specify an output directory, so IperBackup knows where to store your
 files (or the URL list). If you don't specify the output directory, IperBackup will
@@ -107,9 +111,10 @@ end date it will use the current time.
 
 If you want to have your Ipernity permission for each picture to be safed
 in the local filename use this switch:
-   -p 
+   -p or --permission
 
-This will put a string representing the permission into the filename.
+This will put a string representing the permission at the beginning of the filename.
+The result will look something like: perm_public-<original filename>
 
 That's all. Have fun using it!
 
