@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2011-01-04 22:21:27 ]
+# Last modified: [ 2011-01-05 00:14:07 ]
 
 ## This is the IperBackup::Process package {{{
 package IperBackup::Process;
@@ -24,7 +24,7 @@ use Time::HiRes;
 ## Defined constants {{{
 use constant EXT_DEBUG				=> 0;								## Enable extended debug logging
 use constant PER_PAGE				=> 100;								## Number of documents per page to fetch
-use constant VERSION				=> '0.06';							## This modules version
+use constant VERSION				=> '0.07';							## This modules version
 # }}}
 
 ## Constuctor // new() {{{

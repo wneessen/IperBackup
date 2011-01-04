@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2010-12-13 15:37:20 ]
+# Last modified: [ 2011-01-05 00:14:04 ]
 
 ## This is the IperBackup::Config package {{{
 package IperBackup::Config;
@@ -18,9 +18,9 @@ use Carp qw( carp croak );
 # }}}
 
 ## Defined constants {{{
-use constant CONFFILE				=> '/etc/IperBackup.conf';				## Absolute path to config file if non is defined
-use constant EXT_DEBUG				=> 0;								## Enable extended debug logging
-use constant VERSION				=> '0.05';							## This modules version
+use constant CONFFILE				=> './IperBackup.conf';				## Absolute path to config file if non is defined
+use constant EXT_DEBUG				=> 0;						## Enable extended debug logging
+use constant VERSION				=> '0.06';					## This modules version
 # }}}
 
 ## Constuctor // new() {{{
@@ -141,9 +141,8 @@ sub is_present
 	## Get Logger object
 	my $log = IperBackup::Main::get_logger( 'is_present' );
 
-	## Build a full path out of the servername and the path (if file is present)
-	my $conffile = $self->{ 'conf_file' } 
-		if -r $self->{ 'conf_file' };
+	## Set $conffile variable to the conf_file setting in the object
+	my $conffile = $self->{ 'conf_file' } if -r $self->{ 'conf_file' };
 
 	## Return the full path
 	return $conffile;
