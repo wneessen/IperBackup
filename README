@@ -105,6 +105,12 @@ The specified date has to be UTC. If you leave the start date it will use the
 start of the UNIX epoch time (1970-01-01 00:00:00) and if you leave out the
 end date it will use the current time.
 
+If you want to have your Ipernity permission for each picture to be safed
+in the local filename use this switch:
+   -p 
+
+This will put a string representing the permission into the filename.
+
 That's all. Have fun using it!
 
 Comments and critics are always welcome at: doomy@pebcak.de
