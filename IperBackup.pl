@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2011-01-02 20:28:30 ]
+# Last modified: [ 2011-01-04 22:20:31 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -110,7 +110,7 @@ sub main
 		tags		=> $config->{ 'tags' } || undef,
 		startdate	=> $config->{ 'startdate' } || undef,
 		enddate		=> $config->{ 'enddate' } || undef,
-		permission	=> $config->{ 'permission' } || undef,
+		nopermission	=> $config->{ 'nopermission' } || undef,
 
 	);
 	# }}}
@@ -258,8 +258,6 @@ sub main
 	}
 	# }}}
 
-
-
 }
 # }}}
 
@@ -281,7 +279,7 @@ sub getArgs
 		'commentsonly'	=> \$config->{ 'commentsonly' },
 		'startdate|s=s'	=> \$config->{ 'startdate' },
 		'enddate|e=s'	=> \$config->{ 'enddate' },
-		'permission|p'	=> \$config->{ 'permission' },
+		'nopermission|p'=> \$config->{ 'nopermission' },
 
 	);
 	
@@ -352,7 +350,7 @@ sub showHelp
 	print "\n\t-m, --media\t\tSpecify which media type to fetch. Possiblities are: audio, photo, other, video (Default: all)";
 	print "\n\t-n, --comments\t\tFetch comments of the document if any (only works in download mode)";
 	print "\n\t-o, --outdir\t\tSpecify absolute path to the output directory (Default: /var/tmp)";
-	print "\n\t-p, --permission\t\tTell IperBackup to add the permission type to the filename";
+	print "\n\t-p, --nopermission\t\tTell IperBackup to not add the permission type to the filename";
 	print "\n\t-s, --startdate\t\tSpecify the minimum date of documents you are searching";
 	print "\n\t-t, --tags\t\tForce IperBackup to fetch only files with a specific tag (max. 20 tags)";
 	print "\n\n\n";

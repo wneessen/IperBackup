@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2011-01-02 20:27:52 ]
+# Last modified: [ 2011-01-04 22:21:27 ]
 
 ## This is the IperBackup::Process package {{{
 package IperBackup::Process;
@@ -47,7 +47,7 @@ sub new
 	$self->{ 'tags' }	= delete( $args{ 'tags' } );
 	$self->{ 'startdate' }	= delete( $args{ 'startdate' } );
 	$self->{ 'enddate' }	= delete( $args{ 'enddate' } );
-	$self->{ 'permission' }	= delete( $args{ 'permission' } );
+	$self->{ 'nopermission' }= delete( $args{ 'nopermission' } );
 
 	## API object needs to be provided
 	unless( defined( $self->{ 'api' } ) )
@@ -460,7 +460,7 @@ sub isValidFile
 	do{ $log->error( 'Output directory not writeable. Aborting.' ); return undef; };
 	
 	## If user requested to fetch permissions, let get the permission right now
-	my $perm = $self->getPermission( $doc ) if defined( $self->{ 'permission' } and defined( $doc ) );
+	my $perm = $self->getPermission( $doc ) unless defined( $self->{ 'nopermission' } and defined( $doc ) );
 
 	## Check if file is already present
 	if( -f $dir . '/' . $name )
