@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2011-01-05 00:50:45 ]
+# Last modified: [ 2011-01-05 09:56:32 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -292,14 +292,14 @@ sub getArgs
 	## Download mode is implied for commentsonly mode
 	$config->{ 'download' } = 1 if( defined( $config->{ 'commentsonly' } ) );
 
+	## Print version string if requested
+	do { print "This is IperBackup v" . VERSION . " // (C) 2010-2011 Winfried Neessen\n"; exit 0 } if( defined( $config->{ 'version' } ) );
+
 	## Check for conflicts
 	showHelp() if( $config->{ 'help' } );
 	showHelp() unless( defined( $config->{ 'list' } ) or defined( $config->{ 'download' } ) );
 	showHelp() if( defined( $config->{ 'list' } ) and defined( $config->{ 'download' } ) );
 	showHelp() if( defined( $config->{ 'list' } ) and defined( $config->{ 'comment' } ) );
-
-	## Print version string if requested
-	do { print "This is IperBackup v" . VERSION . " // (C) 2010-2011 Winfried Neessen\n"; exit 0 } if( defined( $config->{ 'version' } ) );
 	
 	## Check media types
 	if( defined( $config->{ 'media' } ) )
