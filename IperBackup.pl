@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2011-01-05 09:56:32 ]
+# Last modified: [ 2011-01-05 16:24:00 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -54,8 +54,8 @@ BEGIN
 {
 
 	my $API = $Ipernity::API::VERSION;
-	do{ print "Ipernity::API v0.08 or higher required.\n"; exit 127; }
-		unless( $API >= 0.08 );
+	do{ print "Ipernity::API v0.09 or higher required.\n"; exit 127; }
+		unless( $API >= 0.09 );
 
 }
 # }}}
@@ -93,12 +93,12 @@ sub main
 	
 	## Create an API object {{{
 	my $api = Ipernity::API->new
-	({
+	(
 		api_key		=> $myconfig->{ 'IPER_API_KEY' },
 		secret		=> $myconfig->{ 'IPER_API_SECRET' },
 		outputformat	=> $myconfig->{ 'IPER_API_OUTPUT' },
 
-	});
+	);
 	# }}}
 	
 	## Create an IperBackup::Process object {{{
