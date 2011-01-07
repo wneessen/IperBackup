@@ -1,4 +1,4 @@
-IperBackup v0.08 // 2011-01-05
+IperBackup v0.08 // 2011-01-07
 ==============================
 - Default config file path is ./IperBackup.conf instead of 
   /etc/IperBackup.conf (Issue #2)
@@ -7,6 +7,7 @@ IperBackup v0.08 // 2011-01-05
   switch is given (Issue #3)
 - Permission fetching is enabled by default (Issue #4)
 - Better documentation. Thanks to Falko Zurell (@maxheadroom) for his work
+- IperBackup requires Ipernity::API 0.09 now
 - Added --version / -v switch
 
 IperBackup v0.07 // 2011-01-02
