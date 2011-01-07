@@ -12,7 +12,7 @@ To use IperBackup your system needs to have the following requirements installed
 (best installed from bottom to top):
 
 	- Perl 5.8.x (or higher)
-	- Ipernity::API 0.08 (or higher)
+	- Ipernity::API 0.09 (or higher)
 	- Date::Manip
 	- XML::Simple
 	- LWP::UserAgent
@@ -50,7 +50,7 @@ The usage of IperBackup is pretty simple. First you have to decide which action 
 	
 	-l, --list	to create a list with all download URL, to use in your DL manager
 	or
-	-d, --download	to let IperBackup download each file for your
+	-d, --download to let IperBackup download each file for you
 	
 	the options are mutual exclusive and mandatory. Otherwise IperBackup
 	will just display the help output.
@@ -109,13 +109,28 @@ The specified date has to be UTC. If you leave the start date it will use the
 start of the UNIX epoch time (1970-01-01 00:00:00) and if you leave out the
 end date it will use the current time.
 
+When downloading files from your Ipernity account IperBackup will skip files which 
+are already present in your local output directory. If you want those files downloaded 
+anyhow use the following switch to have IperBackup add a timestamp to the original 
+file name and place it in your local directory
+	
+	-ts or --timestamp
+
 By default IperBackup will fetch the permissions (Ipernity-wise) for each
 document and will store it in the filename. The permission string will be
 stored in the beginning of the filename. The result will look something
-like this: perm_public-<original filename>. You can disable this behaviour
-by using this switch:
+like this: 
+	perm_public-<original filename> for public files,
+	perm_private-<original filename> for only private,
+	perm_familyonly-<original filename> for private + family,
+	perm_friendonly-<original filename> for private + friends,
+	perm_familyandfriend-<original filename> for private + family + friends.
+You can disable this behaviour by using this switch:
 
 	-p or --nopermission
+
+Thus the file will be saved with their original filename.
+
 
 That's all. Have fun using it!
 
