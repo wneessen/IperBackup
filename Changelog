@@ -1,3 +1,8 @@
+IperBackup v0.09 // 2011-01-XX
+==============================
+- Added possibility to fetch albums
+- IperBackup requires Ipernity::API 0.10 now
+
 IperBackup v0.08 // 2011-01-07
 ==============================
 - Default config file path is ./IperBackup.conf instead of 

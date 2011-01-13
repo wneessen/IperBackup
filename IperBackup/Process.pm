@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2011-01-05 00:50:50 ]
+# Last modified: [ 2011-01-13 13:47:27 ]
 
 ## This is the IperBackup::Process package {{{
 package IperBackup::Process;
@@ -17,7 +17,6 @@ use strict;
 use Carp qw( carp croak );
 use Date::Manip;
 use Encode;
-#use Data::Dumper;
 use Time::HiRes;
 # }}}
 
@@ -49,6 +48,7 @@ sub new
 	$self->{ 'enddate' }	  = delete( $args{ 'enddate' } );
 	$self->{ 'nopermission' } = delete( $args{ 'nopermission' } );
 	$self->{ 'timestamp' }	  = delete( $args{ 'timestamp' } );
+	$self->{ 'album' }	  = delete( $args{ 'album' } );
 
 	## API object needs to be provided
 	unless( defined( $self->{ 'api' } ) )
@@ -126,6 +126,7 @@ sub getNumberDocs
 		method		=> 'user.get',
 		media		=> $self->{ 'media' },
 		tags		=> $self->{ 'tags' } || undef,
+		album_id	=> $self->{ 'album' } || undef,
 		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
 
 	);
@@ -297,6 +298,7 @@ sub getNumberPages
 		user_id		=> $self->getUserInfo( 'user_id' ),
 		media		=> $self->{ 'media' },
 		tags		=> $self->{ 'tags' } || undef,
+		album_id	=> $self->{ 'album' } || undef,
 		auth_token	=> $self->{ 'config' }->{ 'IPER_API_AUTHTOKEN' },
 		posted_min	=> UnixDate( $self->{ 'startdate' } || '1970-01-01 00:00:00 UTC', '%s' ),
 		posted_max	=> UnixDate( $self->{ 'enddate' } || 'now', '%s' ),

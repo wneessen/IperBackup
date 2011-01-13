@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-# Last modified: [ 2011-01-05 16:24:00 ]
+# Last modified: [ 2011-01-13 13:47:12 ]
 
 ## This is the IperBackup::Main package {{{
 package IperBackup::Main;
@@ -14,7 +14,6 @@ package IperBackup::Main;
 ### Global modules {{{
 use strict;
 use warnings;
-#use Data::Dumper; ## Debug only
 use Date::Manip;
 use Getopt::Long;
 use IperBackup::Config;
@@ -30,7 +29,7 @@ use constant DEFAULT_MEDIA				=> 'photo,video,audio,other';			## Default media t
 use constant EXT_DEBUG					=> 0;						## Enable extended debug-logging
 use constant LOGLEVEL					=> 'INFO';					## Set the log level
 use constant OUTDIR					=> '/var/tmp';					## Default output directory
-use constant VERSION					=> '0.08';					## Current version number
+use constant VERSION					=> '0.09';					## Current version number
 # }}}
 
 ## Define global variables {{{
@@ -54,8 +53,8 @@ BEGIN
 {
 
 	my $API = $Ipernity::API::VERSION;
-	do{ print "Ipernity::API v0.09 or higher required.\n"; exit 127; }
-		unless( $API >= 0.09 );
+	do{ print "Ipernity::API v0.10 or higher required.\n"; exit 127; }
+		unless( $API >= 0.10 );
 
 }
 # }}}
@@ -112,6 +111,7 @@ sub main
 		enddate		=> $config->{ 'enddate' } || undef,
 		nopermission	=> $config->{ 'nopermission' } || undef,
 		timestamp	=> $config->{ 'timestamp' } || undef,
+		album		=> $config->{ 'album' } || undef,
 
 	);
 	# }}}
@@ -286,6 +286,7 @@ sub getArgs
 		'nopermission|p'=> \$config->{ 'nopermission' },
 		'timestamp|ts'	=> \$config->{ 'timestamp' },
 		'version|v'	=> \$config->{ 'version' },
+		'album|a=s'	=> \$config->{ 'album' },
 
 	);
 	
@@ -349,6 +350,7 @@ sub showHelp
 
 	## Print message
 	print "Usage: $0 [OPTIONS]\n";
+	print "\n\t-a, --album\t\tSpecify an album ID to let IperBackup only fetch documents from that album";
 	print "\n\t-c, --config\t\tSpecify absolute path to config file (Default: /etc/IperBackup.conf)";
 	print "\n\t--comentsonly\t\tDownload comments only";
 	print "\n\t-d, --download\t\tTell IperBackup to download all files in your account";
